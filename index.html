@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <script src="myscripts.js"></script>
+</head>
+<body>
+    Content
+    <script>
+        // Computer's Choice
+        function getComputerChoice() {
+            // Randomly generate Rock, Paper, or Scissors from array
+            const choices = ["rock", "paper", "scissors"];
+            let computerSelection = choices[(Math.floor(Math.random() * choices.length))];
+            return(computerSelection);
+        }
+
+        function playRound(playerSelection, computerSelection){
+            // If Rock
+            if (playerSelection == "rock") {
+                if (computerSelection == "paper") {
+                    return false;
+                }
+                if (computerSelection == "scissors") {
+                    return true;
+                }
+            // If Scissors 
+            } else if (playerSelection == "scissors") {
+                if (computerSelection == "rock") {
+                    return false;
+                }
+                if (computerSelection == "paper") {
+                    return true;
+                }
+            // If Paper
+            } else if (playerSelection == "paper") {
+                if (computerSelection == "scissors") {
+                    return false;
+                }
+                if (computerSelection == "rock") {
+                    return true;
+                }
+            // Error case
+            } else {
+                return false;
+            }
+        }
+
+        // Game
+        function game() {
+            let score = 0;
+            // 5 Rounds
+            for (let i = 0; i < 5; i++) {
+                let computerSelection = getComputerChoice();
+                let playerSelection = "";
+                // Ensure player choice is acceptable
+                while (!["rock", "paper", "scissors"].includes(playerSelection.toLowerCase())) {
+                    playerSelection = prompt("Your Choice: ").toLowerCase();
+                }
+                            // let playerSelection = prompt("Your Choice: ");
+                            // playerSelection = playerSelection.toLowerCase();
+
+                // If Tie
+                if (playerSelection == computerSelection) {
+                    console.log(`Tie!
+                    \nScore: ${score}`);
+                // Current Round
+                } else if (playRound(playerSelection, computerSelection)) {
+                    score++;
+                    console.log(`You win this round - ${playerSelection.charAt(0).toUpperCase() + playerSelection.slice(1)} beats ${computerSelection}.`);
+                    console.log(`Score: ${score}`);
+                }
+                else {
+                    console.log(`You lose this round - ${computerSelection.charAt(0).toUpperCase() + computerSelection.slice(1)} beats ${playerSelection}.`);
+                    console.log(`Score: ${score}`);
+                }
+            }
+            // Final outputs
+            console.log(`Final Score: ${score}`);
+            if (score > 2) {
+                console.log(`You Win!`)
+            } else {
+                console.log(`You Lose!`)
+            }
+        }
+
+        console.log(game());
+    </script>
+    
+</body>
+</html>
