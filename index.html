@@ -5,91 +5,139 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="icon" href="https://fav.farm/✂️" />
     <!-- <link rel="stylesheet" href="style.css"> -->
     <script src="myscripts.js"></script>
 </head>
 <body>
-    Content
+    <h1>Rock Paper Scissors</h1>
+    <h2>Choose your selection:</h2>
+    <div id="container">
+        <button id="rock">Rock</button>
+        <button id="paper">Paper</button>
+        <button id="scissors">Scissors</button>
+    </div>
+    <div id="results">
+        <ul id="rounds"></ul>
+        <div id="score"></div>
+    </div>
+
     <script>
         // Computer's Choice
         function getComputerChoice() {
-            // Randomly generate Rock, Paper, or Scissors from array
             const choices = ["rock", "paper", "scissors"];
-            let computerSelection = choices[(Math.floor(Math.random() * choices.length))];
-            return(computerSelection);
+            return choices[Math.floor(Math.random() * choices.length)];
         }
 
-        function playRound(playerSelection, computerSelection){
-            // If Rock
-            if (playerSelection == "rock") {
-                if (computerSelection == "paper") {
-                    return false;
-                }
-                if (computerSelection == "scissors") {
-                    return true;
-                }
-            // If Scissors 
-            } else if (playerSelection == "scissors") {
-                if (computerSelection == "rock") {
-                    return false;
-                }
-                if (computerSelection == "paper") {
-                    return true;
-                }
-            // If Paper
-            } else if (playerSelection == "paper") {
-                if (computerSelection == "scissors") {
-                    return false;
-                }
-                if (computerSelection == "rock") {
-                    return true;
-                }
-            // Error case
+        // Game mechanics
+        //  What are my win conditions? There are only 3 conditions where user wins.
+        function playRound(playerSelection, computerSelection) {
+            if (playerSelection === computerSelection) {
+                return "tie";
+
+            } else if (
+                (playerSelection === "rock" && computerSelection === "scissors") ||
+                (playerSelection === "scissors" && computerSelection === "paper") ||
+                (playerSelection === "paper" && computerSelection === "rock")
+            ) {
+                return "win";
             } else {
-                return false;
+                return "lose";
             }
         }
 
-        // Game
-        function game() {
-            let score = 0;
-            // 5 Rounds
-            for (let i = 0; i < 5; i++) {
-                let computerSelection = getComputerChoice();
-                let playerSelection = "";
-                // Ensure player choice is acceptable
-                while (!["rock", "paper", "scissors"].includes(playerSelection.toLowerCase())) {
-                    playerSelection = prompt("Your Choice: ").toLowerCase();
-                }
-                            // let playerSelection = prompt("Your Choice: ");
-                            // playerSelection = playerSelection.toLowerCase();
+        // Initialize the game, reset all stats and counters
+        function initializeGame() {
+            let playerScore = 0;
+            let computerScore = 0;
+            let roundCounter = 0;
+            let gameEnded = false;
+            
+            // Select all relevant HTML elements to be used
+            const choices = document.querySelectorAll("button");
+            const rounds = document.querySelector("#rounds");
+            const score = document.querySelector("#score");
 
-                // If Tie
-                if (playerSelection == computerSelection) {
-                    console.log(`Tie!
-                    \nScore: ${score}`);
-                // Current Round
-                } else if (playRound(playerSelection, computerSelection)) {
-                    score++;
-                    console.log(`You win this round - ${playerSelection.charAt(0).toUpperCase() + playerSelection.slice(1)} beats ${computerSelection}.`);
-                    console.log(`Score: ${score}`);
+            // Initial Adding of event listeners to our choices - Whichever button is clicked is sent to handleClick
+            choices.forEach(choice => choice.addEventListener("click", handleClick));
+
+            // Function for running the game itself - what to do after each selection, outputs, and when it's over
+            function handleChoice(choice) {
+                if (gameEnded) return;
+                // Add our choices and round variable
+                const playerSelection = choice.id;
+                const computerSelection = getComputerChoice();
+                const result = playRound(playerSelection, computerSelection);
+                // Create a new HTML list item for each round, but don't add yet - we need to populate it.
+                const round = document.createElement("li");
+
+                // Output for each result type, populate round list item
+                if (result === "tie") {
+                    round.textContent = "Tie!";
+                } else if (result === "win") {
+                    playerScore++;
+                    round.textContent = `Win - ${playerSelection.charAt(0).toUpperCase() + playerSelection.slice(1)} beats ${computerSelection}.`;
+                } else {
+                    computerScore++;
+                    round.textContent = `Loss - ${computerSelection.charAt(0).toUpperCase() + computerSelection.slice(1)} beats ${playerSelection}.`;
                 }
-                else {
-                    console.log(`You lose this round - ${computerSelection.charAt(0).toUpperCase() + computerSelection.slice(1)} beats ${playerSelection}.`);
-                    console.log(`Score: ${score}`);
+                // Now we can add the list item to the DOM
+                rounds.appendChild(round);
+
+                // Score updated after each round
+                const finalScore = `Score: ${playerScore} : ${computerScore}`;
+                score.textContent = finalScore;
+                roundCounter++;
+
+                // Conditions for ending the match - end game, stop clicks, declare winner, present reset button.
+                if (computerScore >= 5 || playerScore >= 5) {
+                    gameEnded = true;
+                    // No more choice clicks when the game ends - Same syntax as original
+                    choices.forEach(choice => choice.removeEventListener("click", handleClick));
+                    // Declare winner
+                    const final = document.createElement("div");
+                    final.setAttribute("id", "final");
+                    final.textContent = playerScore >= 5 ? "You win!" : "You lose!";
+                    document.querySelector("#results").appendChild(final);
+                    // Present NEW GAME button 
+                    const newGameButton = document.createElement("button");
+                    newGameButton.setAttribute("id", "newGame");
+                    newGameButton.innerHTML = "New Game?";
+                    // Click new game => run new game
+                    newGameButton.addEventListener("click", startNewGame);
+                    // Add to DOM
+                    document.querySelector("#results").appendChild(newGameButton);
                 }
             }
-            // Final outputs
-            console.log(`Final Score: ${score}`);
-            if (score > 2) {
-                console.log(`You Win!`)
-            } else {
-                console.log(`You Lose!`)
+
+            // Function to pass click choice into the choice handler
+            function handleClick() {
+                // THIS pertains to whatever choice was clicked to activate this function
+                handleChoice(this);
+            }
+            
+            // What to do in new games - Reset stats, wipe rounds, score, elements
+            // Re-add our choice listeners
+            function startNewGame() {
+                playerScore = 0;
+                computerScore = 0;
+                roundCounter = 0;
+                gameEnded = false;
+
+                rounds.innerHTML = "";
+                score.textContent = "";
+                document.querySelector("#final")?.remove();
+                document.querySelector("#newGame")?.remove();
+                // Same syntax as original
+                choices.forEach(choice => choice.addEventListener("click", handleClick));
             }
         }
 
-        console.log(game());
+
+        // The real command to run our game when the page opens. 
+        initializeGame();
+
     </script>
-    
+
 </body>
 </html>
